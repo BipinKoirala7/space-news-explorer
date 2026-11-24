@@ -1,75 +1,48 @@
-# React + TypeScript + Vite
+# Space News Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A space-themed news reader built on the [Spaceflight News API](https://api.spaceflightnewsapi.net/v4/documentation). Browse articles, blogs and reports, search with a debounce, and scroll through results infinitely.
 
-Currently, two official plugins are available:
+**Live demo:** _add your Vercel/Netlify link here_
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+![Space News Explorer screenshot](./screenshots/desktop.png)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Articles / Blogs / Reports tabs, each using its own endpoint
+- Search with a 400ms debounce; changing the tab or search restarts from the first page
+- Infinite scroll (10 items per request, using `IntersectionObserver`) that stops when `next` is `null`
+- Shimmer skeleton loading, error state with Retry, and empty state
+- Sticky search and tabs, back-to-top button
+- Responsive grid (1, 2 or 3 columns), image fallback, visible keyboard focus
 
-## Expanding the ESLint configuration
+## Tech
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+React, TypeScript, Vite, Tailwind CSS v4 and lucide-react. There is no data-fetching library: the `useNews` hook uses `fetch` and `AbortController` so stale requests are cancelled.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Run locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+git clone <repo-url>
+cd space-news-explorer
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open http://localhost:5173. No API key is needed. For a production build, run `npm run build`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project structure
 
 ```
+src/
+  components/   Header, SearchBox, Tabs, NewsCard, CardSkeleton, StateMessage, BackToTop
+  hooks/        useNews.ts
+  types.ts
+  App.tsx
+```
+
+## What I'd improve with more time
+
+- Dedupe items by `id` when appending, since new posts can shift the offsets between pages
+- Add arrow-key navigation and a tab panel to the tabs for full accessibility
+- Cache results per tab and search (for example with TanStack Query) so switching back is instant
+- Add tests for the `useNews` hook and the date formatting
