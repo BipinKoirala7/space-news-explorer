@@ -1,4 +1,5 @@
-export type Tab = "articles" | "blogs" | "reports";
+export const TAB_IDS = ["articles", "blogs", "reports"] as const;
+export type Tab = (typeof TAB_IDS)[number];
 
 export interface Article {
   id: number;

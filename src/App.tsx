@@ -6,20 +6,44 @@ import CardSkeleton from "./components/CardSkeleton";
 import StateMessage from "./components/StateMessage";
 import BackToTop from "./components/BackToTop";
 import { useNews } from "./hooks/useNews";
-import type { Tab } from "./types";
+import { TAB_IDS, type Tab } from "./types";
+
+function readUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get("tab");
+  return {
+    tab: TAB_IDS.includes(tab as Tab) ? (tab as Tab) : "articles",
+    search: params.get("search")?.trim() ?? "",
+  };
+}
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("articles");
-  const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
+  const [initial] = useState(readUrl);
+  const [tab, setTab] = useState<Tab>(initial.tab);
+  const [query, setQuery] = useState(initial.search);
+  const [search, setSearch] = useState(initial.search);
 
-  const { items, hasMore, isLoading, isLoadingMore, error, loadMore, retry } =
-    useNews(tab, search);
+  const {
+    items,
+    count,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    error,
+    loadMore,
+    retry,
+  } = useNews(tab, search);
 
   useEffect(() => {
     const id = setTimeout(() => setSearch(query.trim()), 400);
     return () => clearTimeout(id);
   }, [query]);
+
+  useEffect(() => {
+    const params = new URLSearchParams({ tab });
+    if (search) params.set("search", search);
+    window.history.replaceState(null, "", `?${params}`);
+  }, [tab, search]);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -70,6 +94,11 @@ export default function App() {
 
     return (
       <>
+        <p className="mb-4 text-sm text-muted">
+          Showing {items.length.toLocaleString("en-US")} of{" "}
+          {count.toLocaleString("en-US")}
+        </p>
+
         <Grid>
           {items.map((article) => (
             <NewsCard key={article.id} article={article} />
